@@ -1,7 +1,11 @@
 package cbarcelos.backend;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -45,5 +49,28 @@ import java.util.List;
                 .distinct()
                 .toList();
     }
+
+    @GetMapping("/livrosautor")
+public List<Livro> getLivrosDoAutor(@RequestParam(value = "autor") String
+autor) {
+return livros.stream()
+.filter(livro->livro.getAutor().equals(autor))
+.toList();
+}
+
+@GetMapping("/livrosautorano/{autor}/ano/{ano}")
+public List<Livro> getLivrosDoAutor(@PathVariable(value="autor") String autor,
+@PathVariable(value="ano") int ano) {
+return livros.stream()
+.filter(livro->livro.getAutor().equals(autor))
+.filter(livro->livro.getAno() == ano)
+.toList();
+}
+
+@PostMapping("/novolivro")
+public boolean cadastraLivroNovo(@RequestBody final Livro livro) {
+livros.add(livro);
+return true;
+}
 
 }
