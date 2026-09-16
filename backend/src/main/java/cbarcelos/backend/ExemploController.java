@@ -1,28 +1,19 @@
 package cbarcelos.backend;
-import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
+import org.springframework.http.*;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.beans.factory.annotation.Autowired;
+
 
 @RestController
-@RequestMapping("/biblioteca")public class ExemploController {
+@RequestMapping("/biblioteca")
+public class ExemploController {
+    private Acervo acervo;
 
-    private List<Livro> livros;
-
-    public ExemploController() {
-        livros = new ArrayList<>();
-
-        livros.add(new Livro(110, "Aprendendo Java", "Maria da Silva", 2015));
-        livros.add(new Livro(120, "Spring-Boot", "Jose de Souza", 2020));
-        livros.add(new Livro(130, "Principios SOLID", "Pedro da Silva", 2023));
-        livros.add(new Livro(140, "Padroes de Projeto", "Joana Moura", 2023));
-        livros.add(new Livro(150, "Teste Unitario", "Pedro da Silva", 2024)); 
+    @Autowired
+    public ExemploController(Acervo acervo) {
+        this.acervo = acervo;        
     }
 
     @GetMapping("/")
@@ -32,45 +23,48 @@ import java.util.List;
 
     @GetMapping("/livros")
     public List<Livro> getLivros() {
-        return livros;
+        return acervo.getLivros();
     }
     
     @GetMapping("/titulos")
     public List<String> getTitulos() {
-        return livros.stream()
-               .map(livro->livro.getTitulo())
-               .toList();
+        return acervo.getTitulos();
     }
 
     @GetMapping("/autores")
     public List<String> getListaAutores() {
-        return livros.stream()
-                .map(l -> l.getAutor())
-                .distinct()
-                .toList();
+        return acervo.getListaAutores();
     }
 
     @GetMapping("/livrosautor")
-public List<Livro> getLivrosDoAutor(@RequestParam(value = "autor") String
-autor) {
-return livros.stream()
-.filter(livro->livro.getAutor().equals(autor))
-.toList();
-}
+    public List<Livro> getLivrosDoAutor(@RequestParam(value = "autor") String autor) {
+        return acervo.getLivrosDoAutor(autor);
+    }
 
-@GetMapping("/livrosautorano/{autor}/ano/{ano}")
-public List<Livro> getLivrosDoAutor(@PathVariable(value="autor") String autor,
-@PathVariable(value="ano") int ano) {
-return livros.stream()
-.filter(livro->livro.getAutor().equals(autor))
-.filter(livro->livro.getAno() == ano)
-.toList();
-}
+    @GetMapping("/livrosautorano/{autor}/ano/{ano}")
+    public List<Livro> getLivrosDoAutor(@PathVariable(value="autor") String autor,
+                                        @PathVariable(value="ano")int ano) {
+        return acervo.getLivrosDoAutor(autor, ano);
+    }
+    
+    @PostMapping("/novolivro")
+    public boolean cadastraLivroNovo(@RequestBody final Livro livro) {
+        return acervo.cadastraLivroNovo(livro);
+    }
 
-@PostMapping("/novolivro")
-public boolean cadastraLivroNovo(@RequestBody final Livro livro) {
-livros.add(livro);
-return true;
-}
+    @GetMapping("/livrotitulo/{titulo}")
+    public ResponseEntity<Livro> getLivroTitulo(@PathVariable("titulo") String titulo) {
+        Livro livro = acervo.getLivroTitulo(titulo);
+        return ResponseEntity
+                    .status(HttpStatus.OK)
+                    .body(livro);
+        }
+
+    @DeleteMapping ("/livrosano/{ano}")
+    public boolean deleteLivrosAno(@PathVariable(value="ano") Integer ano) {
+        return acervo.deleteLivrosAno(ano);
+    }
+
+
 
 }
